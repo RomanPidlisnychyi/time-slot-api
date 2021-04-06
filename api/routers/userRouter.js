@@ -4,9 +4,14 @@ const {
   login,
   authorized,
   current,
+  getTimeslot,
+  updateTimeslot,
 } = require('../controllers/userController');
 const { asyncWrapper } = require('../helpers/asyncWrapper');
-const { registerValidation } = require('../helpers/validation');
+const {
+  registerValidation,
+  updateSlotValidation,
+} = require('../helpers/validation');
 
 const userRouter = Router();
 
@@ -16,6 +21,18 @@ userRouter.get(
   '/users/current',
   asyncWrapper(authorized),
   asyncWrapper(current)
+);
+userRouter.get(
+  '/users/timeslot',
+  asyncWrapper(authorized),
+  asyncWrapper(getTimeslot)
+);
+
+userRouter.post(
+  '/users/timeslot',
+  updateSlotValidation,
+  asyncWrapper(authorized),
+  asyncWrapper(updateTimeslot)
 );
 
 module.exports = userRouter;

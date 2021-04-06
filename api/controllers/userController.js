@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
+const slotModel = require('../models/slotModel');
 const ErrorConstructor = require('../helpers/ErrorConstructor');
+const { createUserSlots } = require('../helpers/createUserSlots');
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -10,7 +12,10 @@ module.exports.register = async (req, res, next) => {
 
   const hash = bcrypt.hashSync(password, salt);
 
-  await userModel.create({ ...req.body, password: hash });
+  const user = await userModel.create({ ...req.body, password: hash });
+
+  const userSlots = createUserSlots(user._id);
+  await slotModel.create(userSlots);
 
   res.status(201).json({ name });
 };
@@ -59,4 +64,29 @@ module.exports.current = async (req, res, next) => {
   const { name } = req.user;
 
   res.status(200).json({ name });
+};
+
+module.exports.getTimeslot = async (req, res, next) => {
+  const { _id: userId } = req.user;
+
+  const userSlots = await slotModel.findOne({ userId });
+  const { slots } = userSlots;
+
+  res.status(200).json(slots);
+};
+
+module.exports.updateTimeslot = async (req, res, next) => {
+  const { _id: userId } = req.user;
+  const { slots } = req.body;
+
+  const userSlots = await slotModel.findOneAndUpdate(
+    { userId },
+    { slots },
+    {
+      new: true,
+    }
+  );
+  const { slots: updatedSlots } = userSlots;
+
+  res.status(200).json({ slots: updatedSlots });
 };

@@ -15,3 +15,17 @@ module.exports.registerValidation = (req, res, next) => {
 
   next();
 };
+
+module.exports.updateSlotValidation = (req, res, next) => {
+  const schema = Joi.object({
+    slots: Joi.array().required(),
+  }).required();
+
+  const validationResult = schema.validate(req.body);
+
+  if (validationResult.error) {
+    return next(new ErrorConstructor(400));
+  }
+
+  next();
+};
